@@ -14,6 +14,7 @@ from associados import (
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="controle-associados", description="Sistema de controle da Associação do Hospital de Amor.")
+    parser.add_argument("--storage-dir", default="/home/sistemas", help="Diretório base de dados/arquivos.")
     parser.add_argument("--db", default="associados.db", help="Caminho do banco SQLite.")
     sub = parser.add_subparsers(dest="comando", required=True)
 
@@ -104,7 +105,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     args = build_parser().parse_args()
-    sistema = SistemaAssociados(args.db)
+    sistema = SistemaAssociados(args.db, storage_dir=args.storage_dir)
 
     try:
         if args.comando == "cadastrar":

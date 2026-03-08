@@ -11,6 +11,9 @@ Sistema completo para gestão administrativa e operacional da associação:
 - Emissão de certificados para participações de voluntariado.
 - Exportação CSV e backup do banco.
 
+> Por padrão, os arquivos são gravados em `/home/sistemas` (banco, exportações e backups).
+> Use `--storage-dir` para alterar o local base.
+
 ## Requisitos
 
 - Python 3.10+
@@ -52,6 +55,7 @@ python3 src/cli.py historico-voluntario --voluntario-id 1
 python3 src/cli.py resumo
 python3 src/cli.py exportar-csv --saida associados.csv
 python3 src/cli.py backup --saida backups/associados.db
+python3 src/cli.py --storage-dir /home/sistemas --db associados.db resumo
 ```
 
 ## Testes

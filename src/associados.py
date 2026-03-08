@@ -10,6 +10,8 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Iterable, Optional
 
+DEFAULT_STORAGE_DIR = Path("/home/sistemas")
+
 CPF_RE = re.compile(r"\d{11}$")
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 TELEFONE_RE = re.compile(r"^\d{10,11}$")
@@ -74,9 +76,18 @@ class ParticipacaoVoluntaria:
 
 
 class SistemaAssociados:
-    def __init__(self, db_path: str = "associados.db") -> None:
-        self.db_path = Path(db_path)
+    def __init__(self, db_path: str = "associados.db", storage_dir: str = str(DEFAULT_STORAGE_DIR)) -> None:
+        self.storage_dir = Path(storage_dir)
+        self.storage_dir.mkdir(parents=True, exist_ok=True)
+        self.db_path = self._resolver_caminho(db_path)
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._criar_tabelas()
+
+    def _resolver_caminho(self, path_str: str) -> Path:
+        path = Path(path_str)
+        if path.is_absolute():
+            return path
+        return (self.storage_dir / path).resolve()
 
     def _connect(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path)
@@ -412,7 +423,8 @@ class SistemaAssociados:
 
     def exportar_associados_csv(self, output_path: str) -> Path:
         associados = self.listar_associados()
-        path = Path(output_path)
+        path = self._resolver_caminho(output_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(["id", "nome", "cpf", "telefone", "email", "cidade", "data_nascimento", "plano", "ativo", "criado_em"])
@@ -421,7 +433,7 @@ class SistemaAssociados:
         return path
 
     def backup(self, backup_path: str) -> Path:
-        destino = Path(backup_path)
+        destino = self._resolver_caminho(backup_path)
         destino.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(self.db_path, destino)
         return destino

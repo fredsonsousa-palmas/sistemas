@@ -111,3 +111,23 @@ def test_voluntariado_certificados_e_carga_horaria(tmp_path: Path) -> None:
     assert historico[0]["certificado"] == codigo
 
     assert sistema.carga_horaria_voluntario(voluntario_id) == 6
+
+
+def test_arquivos_relativos_ficam_no_storage_dir(tmp_path: Path) -> None:
+    sistema = SistemaAssociados("dados/associados.db", storage_dir=str(tmp_path))
+
+    sistema.cadastrar_associado(
+        nome="Ana Clara",
+        cpf="11122233344",
+        telefone="17988887777",
+        plano="Familiar",
+        valor_mensalidade=100,
+    )
+
+    csv_path = sistema.exportar_associados_csv("exports/associados.csv")
+    backup_path = sistema.backup("backups/associados.db")
+
+    assert csv_path == (tmp_path / "exports" / "associados.csv").resolve()
+    assert backup_path == (tmp_path / "backups" / "associados.db").resolve()
+    assert csv_path.exists()
+    assert backup_path.exists()
